@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Usuario</title>
+    <!-- Vinculamos el CSS de Bootstrap desde su CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Formulario de Registro</h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- Formulario de registro -->
+                        <form id="formRegistrar">
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="nombre" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="correo" class="form-label">Correo</label>
+                                <input type="email" class="form-control" id="correo" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="contrasena" class="form-label">Contraseña</label>
+                                <input type="password" class="form-control" id="contrasena" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="rol" class="form-label">Rol</label>
+                                <select class="form-select" id="rol" required>
+                                    <option value="Usuario">Usuario</option>
+                                    <option value="Auditor">Auditor</option>
+                                </select>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <button type="submit" class="btn btn-primary">Registrarse</button>
+                                <!-- Botón para redirigir a la página de inicio de sesión -->
+                                <a href="index.html" class="btn btn-secondary">Iniciar sesión</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vinculamos los scripts de Bootstrap y jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        // Evento de envío del formulario
+        $("#formRegistrar").on("submit", function (event) {
+            event.preventDefault(); // Prevenir el envío por defecto del formulario
+
+            // Obtener los datos del formulario
+            const nombre = $("#nombre").val();
+            const correo = $("#correo").val();
+            const contrasena = $("#contrasena").val();
+            const rol = $("#rol").val();
+
+            // Crear el objeto de datos
+            const data = {
+                nombre: nombre,
+                correo: correo,
+                contrasena: contrasena,
+                rol: rol
+            };
+
+            // Enviar la solicitud POST al backend (usuarios.php)
+            $.ajax({
+                url: 'usuarios.php', // Cambia esto si tu archivo tiene una ubicación diferente
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function (response) {
+                    // Muestra la respuesta del servidor
+                    alert(response.mensaje || "¡Usuario registrado exitosamente!");
+                },
+                error: function (xhr, status, error) {
+                    // Muestra el error si ocurre
+                    alert("Error al registrar el usuario: " + error);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

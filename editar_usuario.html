@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Usuario</title>
+    <!-- Vincular Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Editar Usuario</h1>
+        <form id="formEditarUsuario">
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="nombre" required>
+            </div>
+            <div class="mb-3">
+                <label for="correo" class="form-label">Correo</label>
+                <input type="email" class="form-control" id="correo" required>
+            </div>
+            <div class="mb-3">
+                <label for="rol" class="form-label">Rol</label>
+                <select class="form-control" id="rol" required>
+                    <option value="admin">Administrador</option>
+                    <option value="user">Usuario</option>
+                </select>
+            </div>
+            <div class="d-flex justify-content-between">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a href="administrador_userboard.html" class="btn btn-secondary">Volver Atrás</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Vincular Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Obtener el ID del usuario de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('id');
+
+        function cargarUsuario(id) {
+    fetch(`usuarios.php?id=${id}`, { method: 'GET' })
+        .then(response => response.json())
+        .then(data => {
+            if (data) {
+                document.getElementById('nombre').value = data.nombre;
+                document.getElementById('correo').value = data.correo;
+                document.getElementById('rol').value = data.rol;
+                // Verifica que el valor de 'rol' sea válido antes de asignarlo
+                if (data.rol) {
+                    // Asigna el valor de rol al campo select si existe
+                    document.getElementById('rol').value = data.rol;
+                } else {
+                    // Si el rol está vacío o no existe, asignamos un valor por defecto
+                    document.getElementById('rol').value = 'Usuario, Auditor, Administrador';  // Valor por defecto
+                    alert('Rol no encontrado, se asignará el rol por defecto (Usuario)');
+                }
+            } else {
+                alert('No se encontró el usuario');
+            }
+        })
+        .catch(error => {
+            console.error('Error al cargar los datos:', error);
+            alert('No se pudo cargar el usuario.');
+        });
+}
+
+        // Llamar la función para cargar el usuario al cargar la página
+        document.addEventListener('DOMContentLoaded', function () {
+            cargarUsuario(userId);
+        });
+
+        // Manejar el envío del formulario
+        document.getElementById('formEditarUsuario').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const nombre = document.getElementById('nombre').value;
+            const correo = document.getElementById('correo').value;
+            const rol = document.getElementById('rol').value;
+
+            const usuarioActualizado = {
+                id: userId,
+                nombre: nombre,
+                correo: correo,
+                rol: rol
+            };
+
+            // Enviar los datos actualizados al backend
+            fetch('usuarios.php', {
+                method: 'PUT',
+                body: JSON.stringify(usuarioActualizado),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.mensaje === 'Usuario actualizado correctamente') {
+                    alert('Usuario actualizado correctamente');
+                    window.location.href = 'administrador_dashboard.html'; // Redirigir de vuelta al panel de administración
+                } else {
+                    alert('Hubo un error al actualizar el usuario');
+                }
+            })
+            .catch(error => {
+                console.error('Error al actualizar el usuario:', error);
+                alert('No se pudo actualizar el usuario');
+            });
+        });
+    </script>
+</body>
+</html>

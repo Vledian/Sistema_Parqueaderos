@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Usuario</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Dashboard de Usuario</h2>
+
+        <h3>Registro de Vehículos</h3>
+        <form id="vehiculoForm">
+            <div class="form-group">
+                <label for="tipo_vehiculo">Tipo de Vehículo</label>
+                <select class="form-control" id="tipo_vehiculo" required>
+                    <option value="">Seleccionar tipo</option>
+                    <option value="Carro">Carro</option>
+                    <option value="Moto">Moto</option>
+                    <option value="Bicicleta">Bicicleta</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="placa">Placa del Vehículo</label>
+                <input type="text" class="form-control" id="placa" required>
+            </div>
+            <div class="form-group">
+                <label for="lugar_id">Lugar de Estacionamiento</label>
+                <select class="form-control" id="lugar_id">
+                    <option value="">Seleccionar zona (opcional)</option>
+                    <option value="1">Zona A</option>
+                    <option value="2">Zona B</option>
+                    <option value="3">Zona C</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Registrar Vehículo</button>
+        </form>
+
+        <hr>
+
+        <button class="btn btn-info" id="verVehiculosBtn">Ver Mis Vehículos</button>
+        <button class="btn btn-danger" id="logoutBtn">Cerrar sesión</button>
+
+        <div id="vehiculosList"></div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            const usuarioId = localStorage.getItem('usuario_id');
+            if (!usuarioId) {
+                alert('Por favor, inicia sesión primero.');
+                window.location.href = 'index.html'; // Redirigir al login si no está logueado
+                return;
+            }
+
+            $('#verVehiculosBtn').click(function () {
+                obtenerVehiculos();
+            });
+
+            function obtenerVehiculos() {
+                $.ajax({
+    url: 'vehiculos.php', // Asegúrate de que la URL sea la correcta
+    type: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify(vehiculoData),
+    success: function(response) {
+        const data = JSON.parse(response);
+        if (data.success) {
+            alert('Vehículo registrado exitosamente.');
+            $('#vehiculoForm')[0].reset();
+            obtenerVehiculos();  // Refrescar la lista de vehículos después del registro
+        } else {
+            alert(data.mensaje || 'Hubo un error al registrar el vehículo.');
+        }
+    },
+    error: function(jqXHR, textStatus, errorThrown) {
+        const errorResponse = jqXHR.responseJSON ? jqXHR.responseJSON : { mensaje: 'Hubo un error desconocido al registrar el vehículo.' };
+        console.error('Error al registrar el vehículo:', errorResponse);
+        alert(errorResponse.mensaje || 'Hubo un error al registrar el vehículo.');
+    }
+});
+            }
+
+            $('#vehiculoForm').submit(function (e) {
+    e.preventDefault();
+
+    const tipoVehiculo = $('#tipo_vehiculo').val();
+    const placa = $('#placa').val();
+    const lugarId = $('#lugar_id').val() || null;  // Si no se selecciona lugar, se envía null
+
+    if (!tipoVehiculo || !placa) {
+        alert('Por favor, completa todos los campos obligatorios.');
+        return;
+    }
+
+    const vehiculoData = {
+        usuario_id: usuarioId,
+        tipo_vehiculo: tipoVehiculo,
+        placa: placa,
+        lugar_id: lugarId
+    };
+
+    $.ajax({
+        url: 'vehiculos.php', // Asegúrate de que la URL sea la correcta
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(vehiculoData),
+        success: function (response) {
+            const data = JSON.parse(response);
+            if (data.success) {  // Revisa si 'success' es verdadero
+                alert('Vehículo registrado exitosamente.');
+                $('#vehiculoForm')[0].reset();
+                obtenerVehiculos();  // Refrescar la lista de vehículos después del registro
+            } else {
+                alert(data.mensaje || 'Hubo un error al registrar el vehículo.');
+            }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            const errorResponse = jqXHR.responseJSON ? jqXHR.responseJSON : { mensaje: 'Hubo un error desconocido al registrar el vehículo.' };
+            console.error('Error al registrar el vehículo:', errorResponse);
+            alert(errorResponse.mensaje || 'Hubo un error al registrar el vehículo.');
+        }
+    });
+});
+
+            $('#logoutBtn').click(function () {
+                localStorage.removeItem('usuario_id');
+                window.location.href = 'index.html'; // Redirigir al login
+            });
+        });
+    </script>
+</body>
+</html>
